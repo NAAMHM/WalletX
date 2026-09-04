@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Exchange - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+    <style>
+        .swap-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--shadow-md);
+            margin: var(--spacing-md) 0;
+        }
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+        .exchange-rate-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item active"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Currency Exchange</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div style="max-width: 600px; margin: 0 auto 2rem;">
+                    <div class="card">
+                        <h2 style="margin-bottom: var(--spacing-xl);">Convert Currency</h2>
+                        
+                        <!-- From Currency -->
+                        <div class="form-group">
+                            <label>From Currency</label>
+                            <select id="fromCurrency" onchange="calculateConversion()">
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="AED">AED - UAE Dirham</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="amount" min="0.01" step="0.01" placeholder="Enter amount" oninput="calculateConversion()" value="100">
+                        </div>
+
+                        <!-- Swap Button -->
+                        <div style="text-align: center;">
+                            <button class="swap-btn" onclick="swapCurrencies()">⇅</button>
+                        </div>
+
+                        <!-- To Currency -->
+                        <div class="form-group">
+                            <label>To Currency</label>
+                            <select id="toCurrency" onchange="calculateConversion()">
+                                <option value="INR">INR - Indian Rupee</option>
+                                <option value="USD" selected>USD - US Dollar</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - British Pound</option>
+                                <option value="AED">AED - UAE Dirham</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Converted Amount</label>
+                            <input type="text" id="convertedAmount" value="0.00" readonly style="background: var(--bg-tertiary); font-size: 1.25rem; font-weight: 700; color: var(--primary);">
+                        </div>
+
+                        <div id="exchangeRateInfo" style="padding: var(--spacing-md); background: var(--info-bg); border: 1px solid var(--info); border-radius: var(--radius-md); margin: var(--spacing-md) 0; text-align: center; font-weight: 600; color: var(--info);">
+                            1 INR = 0.012 USD
+                        </div>
+
+                        <button onclick="performConversion()" class="btn btn-primary btn-full btn-large">
+                            💱 Convert Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exchange Rates -->
+                <h3 class="section-title">Current Exchange Rates</h3>
+                <div class="card" id="exchangeRates">
+                    <p class="loading">Loading exchange rates...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let exchangeRates = {
+            INR: 1,
+            USD: 0.012,
+            EUR: 0.011,
+            GBP: 0.0095,
+            AED: 0.044
+        };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        async function loadExchangeRates() {
+            try {
+                const response = await api.getCurrencies();
+                if (response.success && response.data.currencies) {
+                    // Update rates from API if available
+                    response.data.currencies.forEach(curr => {
+                        if (curr.exchangeRate) {
+                            exchangeRates[curr.code] = curr.exchangeRate;
+                        }
+                    });
+                }
+                displayExchangeRates();
+                calculateConversion();
+            } catch (error) {
+                // Use default rates if API fails
+                console.error('Failed to load exchange rates:', error);
+                displayExchangeRates();
+                calculateConversion();
+            }
+        }
+
+        function displayExchangeRates() {
+            const container = document.getElementById('exchangeRates');
+            const baseCurrency = 'INR';
+            
+            let html = '';
+            for (const [currency, rate] of Object.entries(exchangeRates)) {
+                if (currency !== baseCurrency) {
+                    html += `
+                        <div class="exchange-rate-item">
+                            <span style="font-weight: 600;">1 ${baseCurrency} = ${rate.toFixed(4)} ${currency}</span>
+                            <span style="color: var(--text-tertiary); font-size: 0.875rem;">Last updated</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            container.innerHTML = html || '<p class="empty-state">No exchange rates available</p>';
+        }
+
+        function calculateConversion() {
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+
+            if (fromCurrency === toCurrency) {
+                document.getElementById('convertedAmount').value = amount.toFixed(2);
+                document.getElementById('exchangeRateInfo').textContent = `1 ${fromCurrency} = 1 ${toCurrency}`;
+                return;
+            }
+
+            // Calculate conversion using rates
+            const fromRate = exchangeRates[fromCurrency] || 1;
+            const toRate = exchangeRates[toCurrency] || 1;
+            const rate = toRate / fromRate;
+            const converted = amount * rate;
+
+            document.getElementById('convertedAmount').value = converted.toFixed(2);
+            document.getElementById('exchangeRateInfo').textContent = `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
+        }
+
+        function swapCurrencies() {
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+            
+            document.getElementById('fromCurrency').value = toCurrency;
+            document.getElementById('toCurrency').value = fromCurrency;
+            
+            calculateConversion();
+        }
+
+        async function performConversion() {
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            if (fromCurrency === toCurrency) {
+                alert('Please select different currencies');
+                return;
+            }
+
+            try {
+                const response = await api.convertCurrency(fromCurrency, toCurrency, amount);
+                if (response.success) {
+                    alert(`✓ Successfully converted ${amount} ${fromCurrency} to ${response.data.convertedAmount.toFixed(2)} ${toCurrency}`);
+                    // Reload wallet
+                    window.location.href = 'wallet.html';
+                }
+            } catch (error) {
+                alert('Conversion failed: ' + error.message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadExchangeRates);
+    </script>
+</body>
+</html>

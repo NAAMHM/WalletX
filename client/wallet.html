@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>💳 WalletX</h2>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item active"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">My Wallet</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <!-- Main Balance Card -->
+                <div class="gradient-card" style="margin-bottom: var(--spacing-xl);">
+                    <p class="balance-label">Wallet Balance</p>
+                    <h1 class="balance-amount"><span id="mainCurrencySymbol">₹</span><span id="mainBalance">0.00</span></h1>
+                    <p class="balance-label" style="margin-top: var(--spacing-sm);">Wallet ID: <span id="walletId">-</span></p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-xl);">
+                    <button onclick="showAddMoneyModal()" class="btn btn-success btn-large">
+                        ➕ Add Money
+                    </button>
+                    <button onclick="showWithdrawModal()" class="btn btn-secondary btn-large">
+                        ➖ Withdraw
+                    </button>
+                    <a href="send-money.html" class="btn btn-primary btn-large">
+                        📤 Send Money
+                    </a>
+                    <a href="currency.html" class="btn btn-secondary btn-large">
+                        💱 Convert Currency
+                    </a>
+                </div>
+
+                <!-- Currency Balances -->
+                <h3 class="section-title">All Currency Balances</h3>
+                <div class="stats-grid" id="currencyGrid">
+                    <p class="loading">Loading balances...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Money Modal -->
+    <div id="addMoneyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Money</h2>
+                <button class="close-btn" onclick="closeModal('addMoneyModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addMoneyForm">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="addAmount" min="1" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select id="addCurrency" required>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="AED">AED - UAE Dirham</option>
+                        </select>
+                    </div>
+                    <div id="addErrorMessage" class="error-message"></div>
+                    <div id="addSuccessMessage" class="success-message"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addMoneyModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddMoney()">Add Money</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Withdraw Money</h2>
+                <button class="close-btn" onclick="closeModal('withdrawModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="withdrawForm">
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="withdrawAmount" min="1" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select id="withdrawCurrency" required>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="AED">AED - UAE Dirham</option>
+                        </select>
+                    </div>
+                    <div id="withdrawErrorMessage" class="error-message"></div>
+                    <div id="withdrawSuccessMessage" class="success-message"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('withdrawModal')">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="submitWithdraw()">Withdraw</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/wallet.js"></script>
+</body>
+</html>

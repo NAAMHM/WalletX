@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>💳 WalletX</h2>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="wallet.html" class="nav-item">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Wallet</span>
+                </a>
+                <a href="send-money.html" class="nav-item">
+                    <span class="nav-icon">📤</span>
+                    <span class="nav-text">Send Money</span>
+                </a>
+                <a href="request-money.html" class="nav-item">
+                    <span class="nav-icon">📥</span>
+                    <span class="nav-text">Request Money</span>
+                </a>
+                <a href="qr-payment.html" class="nav-item">
+                    <span class="nav-icon">📱</span>
+                    <span class="nav-text">QR Payment</span>
+                </a>
+                <a href="bills.html" class="nav-item">
+                    <span class="nav-icon">🧾</span>
+                    <span class="nav-text">Bill Payments</span>
+                </a>
+                <a href="transactions.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Transactions</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Analytics</span>
+                </a>
+                <a href="currency.html" class="nav-item">
+                    <span class="nav-icon">💱</span>
+                    <span class="nav-text">Currency</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <a href="#" class="nav-item" onclick="logout()">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <p class="demo-notice">⚠️ Demo Platform</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="nav-right">
+                    <div class="user-menu">
+                        <span id="userName">Loading...</span>
+                        <div class="user-avatar" id="userAvatar">👤</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <!-- Gradient Balance Card -->
+                <div class="gradient-card" style="margin-bottom: var(--spacing-xl);">
+                    <div class="balance-display">
+                        <p class="balance-label">Available Balance</p>
+                        <h1 class="balance-amount" id="balanceAmount">
+                            <span id="currencySymbol">₹</span><span id="balanceValue">0.00</span>
+                        </h1>
+                        <div style="display: flex; gap: var(--spacing-lg); margin-top: var(--spacing-lg); flex-wrap: wrap;">
+                            <div>
+                                <p class="balance-label" style="font-size: 0.75rem; margin: 0;">Wallet ID</p>
+                                <p style="margin: 0; font-weight: 600;" id="walletId">-</p>
+                            </div>
+                            <div>
+                                <p class="balance-label" style="font-size: 0.75rem; margin: 0;">Currency</p>
+                                <p style="margin: 0; font-weight: 600;" id="preferredCurrency">INR</p>
+                            </div>
+                            <div>
+                                <p class="balance-label" style="font-size: 0.75rem; margin: 0;">Status</p>
+                                <span class="badge badge-success" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white;">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-xl);">
+                    <a href="wallet.html" class="card" style="padding: var(--spacing-lg); text-align: center; text-decoration: none;">
+                        <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">➕</div>
+                        <div style="font-weight: 600; font-size: 0.875rem;">Add Money</div>
+                    </a>
+                    <a href="send-money.html" class="card" style="padding: var(--spacing-lg); text-align: center; text-decoration: none;">
+                        <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">📤</div>
+                        <div style="font-weight: 600; font-size: 0.875rem;">Send Money</div>
+                    </a>
+                    <a href="request-money.html" class="card" style="padding: var(--spacing-lg); text-align: center; text-decoration: none;">
+                        <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">📥</div>
+                        <div style="font-weight: 600; font-size: 0.875rem;">Request</div>
+                    </a>
+                    <a href="qr-payment.html" class="card" style="padding: var(--spacing-lg); text-align: center; text-decoration: none;">
+                        <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">📱</div>
+                        <div style="font-weight: 600; font-size: 0.875rem;">QR Pay</div>
+                    </a>
+                    <a href="bills.html" class="card" style="padding: var(--spacing-lg); text-align: center; text-decoration: none;">
+                        <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">🧾</div>
+                        <div style="font-weight: 600; font-size: 0.875rem;">Pay Bills</div>
+                    </a>
+                    <a href="currency.html" class="card" style="padding: var(--spacing-lg); text-align: center; text-decoration: none;">
+                        <div style="font-size: 2rem; margin-bottom: var(--spacing-sm);">💱</div>
+                        <div style="font-weight: 600; font-size: 0.875rem;">Convert</div>
+                    </a>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: var(--success-bg);">➕</div>
+                        </div>
+                        <p class="stat-label">Total Added</p>
+                        <h2 class="stat-value" id="totalAdded">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: var(--error-bg);">📤</div>
+                        </div>
+                        <p class="stat-label">Total Sent</p>
+                        <h2 class="stat-value" id="totalSent">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: var(--success-bg);">📥</div>
+                        </div>
+                        <p class="stat-label">Total Received</p>
+                        <h2 class="stat-value" id="totalReceived">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: var(--info-bg);">📊</div>
+                        </div>
+                        <p class="stat-label">Transactions</p>
+                        <h2 class="stat-value" id="transactionCount">0</h2>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div style="margin-top: var(--spacing-xl);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+                        <h3 class="section-title" style="margin: 0;">Recent Transactions</h3>
+                        <a href="transactions.html" class="btn btn-secondary" style="padding: 0.5rem 1rem;">View All →</a>
+                    </div>
+                    <div id="recentTransactions">
+                        <p class="loading">Loading transactions...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const currencySymbols = {
+            INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ'
+        };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        async function loadDashboard() {
+            try {
+                // Load user
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const user = JSON.parse(storedUser);
+                    document.getElementById('userName').textContent = user.fullName || 'User';
+                    const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2);
+                    document.getElementById('userAvatar').textContent = initials;
+                }
+
+                // Load wallet
+                const walletRes = await api.getWallet();
+                if (walletRes.success) {
+                    const wallet = walletRes.data;
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    const currency = user.preferredCurrency || 'INR';
+                    const balance = wallet.balances?.[currency] || 0;
+                    
+                    document.getElementById('currencySymbol').textContent = currencySymbols[currency] || currency;
+                    document.getElementById('balanceValue').textContent = balance.toFixed(2);
+                    document.getElementById('walletId').textContent = wallet.walletId || '-';
+                    document.getElementById('preferredCurrency').textContent = currency;
+                    
+                    const symbol = currencySymbols[currency] || currency;
+                    document.getElementById('totalAdded').textContent = `${symbol}${(wallet.totalMoneyAdded || 0).toFixed(2)}`;
+                    document.getElementById('totalSent').textContent = `${symbol}${(wallet.totalMoneySent || 0).toFixed(2)}`;
+                    document.getElementById('totalReceived').textContent = `${symbol}${(wallet.totalMoneyReceived || 0).toFixed(2)}`;
+                }
+
+                // Load transactions
+                const txRes = await api.getTransactions({ page: 1, limit: 5 });
+                if (txRes.success) {
+                    document.getElementById('transactionCount').textContent = txRes.data.pagination.total;
+                    displayTransactions(txRes.data.transactions);
+                }
+            } catch (error) {
+                console.error('Dashboard error:', error);
+            }
+        }
+
+        function displayTransactions(transactions) {
+            const container = document.getElementById('recentTransactions');
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = '<p class="empty-state">No transactions yet</p>';
+                return;
+            }
+
+            const icons = {
+                ADD_MONEY: '➕', WITHDRAW: '➖', SEND: '📤', RECEIVE: '📥',
+                BILL_PAYMENT: '🧾', QR_PAYMENT: '📱', CURRENCY_CONVERSION: '💱'
+            };
+
+            container.innerHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div class="transaction-icon">${icons[tx.type] || '💳'}</div>
+                    <div class="transaction-info">
+                        <h4>${tx.description || tx.type.replace(/_/g, ' ')}</h4>
+                        <p class="transaction-date">${new Date(tx.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div class="transaction-amount ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? 'positive' : 'negative'}">
+                        ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? '+' : '-'}${currencySymbols[tx.currency] || tx.currency}${tx.amount.toFixed(2)}
+                    </div>
+                    <div class="transaction-status ${tx.status.toLowerCase()}">${tx.status}</div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

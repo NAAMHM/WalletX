@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Payments - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+    <style>
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+        .category-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .category-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .category-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-glow);
+        }
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        .category-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item active"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Bill Payments</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <h3 class="section-title">Select Category</h3>
+                <div class="category-grid">
+                    <div class="category-card" onclick="selectCategory('ELECTRICITY', this)">
+                        <div class="category-icon">⚡</div>
+                        <div class="category-name">Electricity</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('WATER', this)">
+                        <div class="category-icon">💧</div>
+                        <div class="category-name">Water</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('MOBILE', this)">
+                        <div class="category-icon">📱</div>
+                        <div class="category-name">Mobile</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('INTERNET', this)">
+                        <div class="category-icon">🌐</div>
+                        <div class="category-name">Internet</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('GAS', this)">
+                        <div class="category-icon">🔥</div>
+                        <div class="category-name">Gas</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('DTH', this)">
+                        <div class="category-icon">📺</div>
+                        <div class="category-name">DTH</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('INSURANCE', this)">
+                        <div class="category-icon">🛡️</div>
+                        <div class="category-name">Insurance</div>
+                    </div>
+                    <div class="category-card" onclick="selectCategory('CREDIT_CARD', this)">
+                        <div class="category-icon">💳</div>
+                        <div class="category-name">Credit Card</div>
+                    </div>
+                </div>
+
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div class="card">
+                        <h2 style="margin-bottom: var(--spacing-xl);">Pay Bill</h2>
+                        <form id="payBillForm">
+                            <input type="hidden" id="category" required>
+
+                            <div class="form-group">
+                                <label>Service Provider</label>
+                                <select id="provider" required>
+                                    <option value="">Select category first</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Consumer/Account Number</label>
+                                <input type="text" id="accountNumber" placeholder="Enter your account number" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="number" id="amount" min="1" step="0.01" placeholder="Enter bill amount" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select id="currency" required>
+                                    <option value="INR">INR - Indian Rupee</option>
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="AED">AED - UAE Dirham</option>
+                                </select>
+                            </div>
+
+                            <div id="errorMessage" class="error-message"></div>
+                            <div id="successMessage" class="success-message"></div>
+
+                            <button type="submit" class="btn btn-primary btn-full btn-large">🧾 Pay Bill</button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 class="section-title" style="margin-top: var(--spacing-2xl);">Recent Bill Payments</h3>
+                <div id="billHistory">
+                    <p class="loading">Loading history...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        function showMessage(elementId, message) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 5000);
+            }
+        }
+
+        async function selectCategory(category, element) {
+            // Remove selected class from all
+            document.querySelectorAll('.category-card').forEach(card => card.classList.remove('selected'));
+            // Add to selected
+            element.classList.add('selected');
+            // Set category
+            document.getElementById('category').value = category;
+            // Load providers
+            await loadProviders(category);
+        }
+
+        async function loadProviders(category) {
+            const providerSelect = document.getElementById('provider');
+            
+            if (!category) {
+                providerSelect.innerHTML = '<option value="">Select category first</option>';
+                return;
+            }
+
+            try {
+                const response = await api.getBillProviders(category);
+                if (response.success) {
+                    providerSelect.innerHTML = response.data.providers.map(p => 
+                        `<option value="${p.name}">${p.name}</option>`
+                    ).join('');
+                }
+            } catch (error) {
+                providerSelect.innerHTML = '<option value="">Failed to load providers</option>';
+            }
+        }
+
+        document.getElementById('payBillForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const billData = {
+                category: document.getElementById('category').value,
+                provider: document.getElementById('provider').value,
+                accountNumber: document.getElementById('accountNumber').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                currency: document.getElementById('currency').value
+            };
+
+            if (!billData.category) {
+                showMessage('errorMessage', 'Please select a category');
+                return;
+            }
+
+            try {
+                const response = await api.payBill(billData);
+                if (response.success) {
+                    showMessage('successMessage', 'Bill paid successfully!');
+                    e.target.reset();
+                    document.querySelectorAll('.category-card').forEach(card => card.classList.remove('selected'));
+                    loadBillHistory();
+                }
+            } catch (error) {
+                showMessage('errorMessage', error.message || 'Failed to pay bill');
+            }
+        });
+
+        async function loadBillHistory() {
+            try {
+                const response = await api.getBillHistory({ page: 1, limit: 10 });
+                const list = document.getElementById('billHistory');
+                if (response.success && response.data.bills.length > 0) {
+                    const symbols = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ' };
+                    list.innerHTML = response.data.bills.map(bill => `
+                        <div class="card" style="margin-bottom: var(--spacing-md);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; gap: var(--spacing-md);">
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 0.5rem 0;">${bill.category}: ${bill.provider}</h4>
+                                    <p style="color: var(--text-secondary); margin: 0 0 0.5rem 0;">Amount: <strong>${symbols[bill.currency]}${bill.amount}</strong></p>
+                                    <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0;">${new Date(bill.createdAt).toLocaleDateString()}</p>
+                                </div>
+                                <span class="badge badge-${bill.status.toLowerCase()}">${bill.status}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<p class="empty-state">No bill payments found</p>';
+                }
+            } catch (error) {
+                document.getElementById('billHistory').innerHTML = '<p class="error-state">Failed to load history</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadBillHistory);
+    </script>
+</body>
+</html>

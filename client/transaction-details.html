@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Details - WalletX</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="transactions.html" class="nav-item active"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Transaction Details</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div class="transfer-card">
+                    <h2>Transaction Information</h2>
+                    <div id="transactionDetails" style="padding: 1rem;">
+                        <p class="loading">Loading details...</p>
+                    </div>
+                    <button onclick="history.back()" class="btn btn-secondary">Back to Transactions</button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        async function loadDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const txId = urlParams.get('id');
+            
+            if (!txId) {
+                document.getElementById('transactionDetails').innerHTML = '<p style="color:#ef4444;">No transaction ID provided</p>';
+                return;
+            }
+
+            try {
+                const response = await api.getTransactionDetails(txId);
+                if (response.success) {
+                    const tx = response.data;
+                    const symbols = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ' };
+                    document.getElementById('transactionDetails').innerHTML = `
+                        <div style="display:grid; gap:1rem;">
+                            <p><strong>Transaction ID:</strong> ${tx.transactionId}</p>
+                            <p><strong>Type:</strong> ${tx.type}</p>
+                            <p><strong>Amount:</strong> ${symbols[tx.currency]}${tx.amount}</p>
+                            <p><strong>Status:</strong> <span class="badge ${tx.status.toLowerCase()}">${tx.status}</span></p>
+                            <p><strong>Description:</strong> ${tx.description}</p>
+                            <p><strong>Date:</strong> ${new Date(tx.createdAt).toLocaleString()}</p>
+                            ${tx.note ? `<p><strong>Note:</strong> ${tx.note}</p>` : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('transactionDetails').innerHTML = '<p style="color:#ef4444;">Failed to load details</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDetails);
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item active"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Transaction History</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <!-- Summary Stats -->
+                <div class="stats-grid" style="margin-bottom: var(--spacing-xl);">
+                    <div class="stat-card">
+                        <p class="stat-label">Total Income</p>
+                        <h2 class="stat-value" style="color: var(--income);" id="totalIncome">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Expense</p>
+                        <h2 class="stat-value" style="color: var(--expense);" id="totalExpense">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Sent</p>
+                        <h2 class="stat-value" id="totalSent">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Received</p>
+                        <h2 class="stat-value" id="totalReceived">₹0.00</h2>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: var(--spacing-xl);">
+                    <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+                        <select id="typeFilter" style="flex: 1; min-width: 150px;">
+                            <option value="">All Types</option>
+                            <option value="SEND">Send</option>
+                            <option value="RECEIVE">Receive</option>
+                            <option value="ADD_MONEY">Add Money</option>
+                            <option value="BILL_PAYMENT">Bill Payment</option>
+                            <option value="QR_PAYMENT">QR Payment</option>
+                        </select>
+                        <select id="statusFilter" style="flex: 1; min-width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="SUCCESS">Success</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="FAILED">Failed</option>
+                        </select>
+                        <button onclick="applyFilters()" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+
+                <!-- Transactions List -->
+                <div id="transactionsList">
+                    <p class="loading">Loading transactions...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const currencySymbols = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ' };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        async function loadTransactions() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            try {
+                const response = await api.getTransactions({ page: 1, limit: 50, type: typeFilter, status: statusFilter });
+                
+                if (response.success) {
+                    displayTransactions(response.data.transactions);
+                    updateSummary(response.data.transactions);
+                }
+            } catch (error) {
+                document.getElementById('transactionsList').innerHTML = '<p class="error-state">Failed to load transactions</p>';
+            }
+        }
+
+        function displayTransactions(transactions) {
+            const list = document.getElementById('transactionsList');
+            
+            if (!transactions || transactions.length === 0) {
+                list.innerHTML = '<p class="empty-state">No transactions found</p>';
+                return;
+            }
+
+            const icons = {
+                ADD_MONEY: '➕', WITHDRAW: '➖', SEND: '📤', RECEIVE: '📥',
+                BILL_PAYMENT: '🧾', QR_PAYMENT: '📱', CURRENCY_CONVERSION: '💱'
+            };
+
+            list.innerHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div class="transaction-icon">${icons[tx.type] || '💳'}</div>
+                    <div class="transaction-info">
+                        <h4>${tx.description || tx.type.replace(/_/g, ' ')}</h4>
+                        <p class="transaction-date">${new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <div class="transaction-amount ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? 'positive' : 'negative'}">
+                        ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? '+' : '-'}${currencySymbols[tx.currency] || tx.currency}${tx.amount.toFixed(2)}
+                    </div>
+                    <div class="transaction-status ${tx.status.toLowerCase()}">${tx.status}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateSummary(transactions) {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const currency = user.preferredCurrency || 'INR';
+            const symbol = currencySymbols[currency] || currency;
+
+            let income = 0, expense = 0, sent = 0, received = 0;
+
+            transactions.forEach(tx => {
+                if (tx.status === 'SUCCESS') {
+                    if (['ADD_MONEY', 'RECEIVE'].includes(tx.type)) {
+                        income += tx.amount;
+                    }
+                    if (['SEND', 'BILL_PAYMENT', 'QR_PAYMENT', 'WITHDRAW'].includes(tx.type)) {
+                        expense += tx.amount;
+                    }
+                    if (tx.type === 'SEND') sent += tx.amount;
+                    if (tx.type === 'RECEIVE') received += tx.amount;
+                }
+            });
+
+            document.getElementById('totalIncome').textContent = `${symbol}${income.toFixed(2)}`;
+            document.getElementById('totalExpense').textContent = `${symbol}${expense.toFixed(2)}`;
+            document.getElementById('totalSent').textContent = `${symbol}${sent.toFixed(2)}`;
+            document.getElementById('totalReceived').textContent = `${symbol}${received.toFixed(2)}`;
+        }
+
+        function applyFilters() {
+            loadTransactions();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTransactions);
+    </script>
+</body>
+</html>

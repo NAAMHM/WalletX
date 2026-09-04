@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item active"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">My Profile</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <div class="card">
+                        <!-- Profile Header -->
+                        <div style="text-align: center; margin-bottom: var(--spacing-xl);">
+                            <div class="user-avatar" style="width: 100px; height: 100px; font-size: 2.5rem; margin: 0 auto var(--spacing-md);" id="profileAvatar">👤</div>
+                            <h2 id="profileName" style="margin-bottom: var(--spacing-sm);">Loading...</h2>
+                            <p style="color: var(--text-tertiary); margin: 0;" id="profileEmail">-</p>
+                        </div>
+
+                        <!-- Profile Information -->
+                        <div id="profileInfo">
+                            <p class="loading">Loading profile...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await api.getProfile();
+                if (response.success) {
+                    const user = response.data.user || response.data;
+                    
+                    // Update avatar
+                    const initials = (user.fullName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2);
+                    document.getElementById('profileAvatar').textContent = initials;
+                    document.getElementById('profileName').textContent = user.fullName || 'User';
+                    document.getElementById('profileEmail').textContent = user.email || '-';
+                    
+                    // Display profile info
+                    document.getElementById('profileInfo').innerHTML = `
+                        <div style="display: grid; gap: var(--spacing-lg);">
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">FULL NAME</p>
+                                <p style="font-weight: 600; margin: 0;">${user.fullName || '-'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">EMAIL ADDRESS</p>
+                                <p style="font-weight: 600; margin: 0;">${user.email || '-'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">MOBILE NUMBER</p>
+                                <p style="font-weight: 600; margin: 0;">${user.mobile || '-'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">COUNTRY</p>
+                                <p style="font-weight: 600; margin: 0;">${user.country || '-'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">PREFERRED CURRENCY</p>
+                                <p style="font-weight: 600; margin: 0;">${user.preferredCurrency || 'INR'}</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">ACCOUNT STATUS</p>
+                                <span class="badge badge-${user.status === 'ACTIVE' ? 'success' : 'warning'}">${user.status || 'ACTIVE'}</span>
+                            </div>
+                            <div>
+                                <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0 0 0.25rem 0;">MEMBER SINCE</p>
+                                <p style="font-weight: 600; margin: 0;">${new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('profileInfo').innerHTML = '<p class="error-state">Failed to load profile</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>

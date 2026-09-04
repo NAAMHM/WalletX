@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            padding: var(--spacing-xl);
+        }
+        
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            max-width: 450px;
+            width: 100%;
+            box-shadow: var(--shadow-xl);
+            animation: slideUp 0.5s ease;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .auth-brand {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .auth-subtitle {
+            color: var(--text-tertiary);
+            font-size: 0.9375rem;
+        }
+        
+        .show-password-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 1.125rem;
+            padding: var(--spacing-sm);
+        }
+        
+        .auth-links {
+            text-align: center;
+            margin-top: var(--spacing-lg);
+            color: var(--text-tertiary);
+        }
+        
+        .auth-links a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .auth-links a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-brand">💳 WalletX</div>
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to your WalletX account</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email or Mobile</label>
+                    <input type="text" id="email" placeholder="Enter your email or mobile" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="show-password-btn" onclick="togglePassword()">👁️</button>
+                    </div>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-large">
+                    <span id="loginText">Login</span>
+                    <span id="loginLoader" style="display: none;">Logging in...</span>
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: var(--spacing-lg);">
+                <button type="button" onclick="fillDemoCredentials()" class="btn btn-secondary btn-full" style="margin-bottom: var(--spacing-md);">
+                    🎭 Use Demo Account
+                </button>
+            </div>
+
+            <div class="auth-links">
+                Don't have an account? <a href="register.html">Create Account</a>
+            </div>
+
+            <div class="auth-links">
+                <a href="index.html">← Back to Home</a>
+            </div>
+
+            <div class="demo-notice" style="margin-top: var(--spacing-xl); font-size: 0.8125rem;">
+                ⚠️ Demo credentials: john@walletx.demo / User@12345
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        function fillDemoCredentials() {
+            document.getElementById('email').value = 'john@walletx.demo';
+            document.getElementById('password').value = 'User@12345';
+            
+            // Add visual feedback
+            const demoBtn = event.target;
+            const originalText = demoBtn.innerHTML;
+            demoBtn.innerHTML = '✅ Demo Credentials Filled!';
+            demoBtn.style.background = 'var(--success)';
+            
+            setTimeout(() => {
+                demoBtn.innerHTML = originalText;
+                demoBtn.style.background = '';
+            }, 2000);
+            
+            // Optionally auto-submit after a short delay
+            // setTimeout(() => {
+            //     document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            // }, 1000);
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = document.querySelector('.show-password-btn');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function showMessage(type, message) {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+            
+            if (type === 'error') {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            } else {
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginText = document.getElementById('loginText');
+            const loginLoader = document.getElementById('loginLoader');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            submitBtn.disabled = true;
+            loginText.style.display = 'none';
+            loginLoader.style.display = 'inline';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await api.login(email, password);
+                
+                if (response.success) {
+                    localStorage.setItem('token', response.data.token);
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    
+                    showMessage('success', 'Login successful! Redirecting...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    showMessage('error', response.message || 'Login failed');
+                    submitBtn.disabled = false;
+                    loginText.style.display = 'inline';
+                    loginLoader.style.display = 'none';
+                }
+            } catch (error) {
+                showMessage('error', error.message || 'Login failed. Please check your credentials.');
+                submitBtn.disabled = false;
+                loginText.style.display = 'inline';
+                loginLoader.style.display = 'none';
+            }
+        });
+
+        // Auto-fill demo credentials if coming from demo link
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('demo') === 'true') {
+                fillDemoCredentials();
+            }
+        });
+    </script>
+</body>
+</html>

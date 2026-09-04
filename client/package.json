@@ -1,0 +1,8 @@
+{
+  "name": "walletx-client",
+  "version": "1.0.0",
+  "description": "WalletX Frontend",
+  "scripts": {
+    "start": "npx --yes http-server -p 3000 -c-1 --cors"
+  }
+}

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item active"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Analytics</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <!-- Period Filter -->
+                <div class="card" style="padding: var(--spacing-md); margin-bottom: var(--spacing-xl);">
+                    <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                        <button class="btn btn-primary period-btn active" data-period="week" onclick="changePeriod('week')">7 Days</button>
+                        <button class="btn btn-secondary period-btn" data-period="month" onclick="changePeriod('month')">30 Days</button>
+                        <button class="btn btn-secondary period-btn" data-period="year" onclick="changePeriod('year')">1 Year</button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <p class="stat-label">Total Income</p>
+                        <h2 class="stat-value" style="color: var(--income);">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Expense</p>
+                        <h2 class="stat-value" style="color: var(--expense);">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Sent</p>
+                        <h2 class="stat-value">₹0.00</h2>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Received</p>
+                        <h2 class="stat-value">₹0.00</h2>
+                    </div>
+                </div>
+
+                <!-- Transaction Breakdown -->
+                <div style="margin-top: var(--spacing-xl);">
+                    <h3 class="section-title">Transaction Breakdown</h3>
+                    <div class="card" id="breakdownCard">
+                        <p class="loading">Loading breakdown...</p>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--spacing-xl); margin-top: var(--spacing-xl);">
+                    <!-- Income vs Expense Trend -->
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-lg); font-size: 1.125rem;">💹 Income vs Expense Trend</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+
+                    <!-- Transaction Type Distribution -->
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-lg); font-size: 1.125rem;">📊 Transaction Distribution</h3>
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Comparison -->
+                <div style="margin-top: var(--spacing-xl);">
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-lg); font-size: 1.125rem;">📈 Monthly Comparison</h3>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const symbols = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ' };
+        let currentPeriod = 'month';
+        let trendChart, distributionChart, monthlyChart;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        function changePeriod(period) {
+            currentPeriod = period;
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.classList.remove('active', 'btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            const activeBtn = document.querySelector(`[data-period="${period}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'btn-primary');
+                activeBtn.classList.remove('btn-secondary');
+            }
+            loadAnalytics();
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await api.getTransactionStats(currentPeriod);
+                
+                const userData = JSON.parse(localStorage.getItem('user') || '{}');
+                const currency = userData.preferredCurrency || 'INR';
+                const symbol = symbols[currency] || currency;
+
+                if (response.success && response.data && response.data.stats) {
+                    const stats = response.data.stats;
+                    
+                    // FIXED: Use safe defaults to prevent "undefined"
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="stat-card">
+                            <p class="stat-label">Total Income</p>
+                            <h2 class="stat-value" style="color: var(--income);">${symbol}${(stats.totalIncome || 0).toFixed(2)}</h2>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-label">Total Expense</p>
+                            <h2 class="stat-value" style="color: var(--expense);">${symbol}${(stats.totalExpense || 0).toFixed(2)}</h2>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-label">Total Sent</p>
+                            <h2 class="stat-value">${symbol}${(stats.totalSent || 0).toFixed(2)}</h2>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-label">Total Received</p>
+                            <h2 class="stat-value">${symbol}${(stats.totalReceived || 0).toFixed(2)}</h2>
+                        </div>
+                    `;
+                    
+                    displayBreakdown(stats);
+                    createCharts(stats, symbol);
+                } else {
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="stat-card"><p class="stat-label">Total Income</p><h2 class="stat-value" style="color: var(--income);">${symbol}0.00</h2></div>
+                        <div class="stat-card"><p class="stat-label">Total Expense</p><h2 class="stat-value" style="color: var(--expense);">${symbol}0.00</h2></div>
+                        <div class="stat-card"><p class="stat-label">Total Sent</p><h2 class="stat-value">${symbol}0.00</h2></div>
+                        <div class="stat-card"><p class="stat-label">Total Received</p><h2 class="stat-value">${symbol}0.00</h2></div>
+                    `;
+                    document.getElementById('breakdownCard').innerHTML = '<p class="empty-state">No transaction data for this period</p>';
+                    createCharts({ byType: {}, totalIncome: 0, totalExpense: 0 }, symbol);
+                }
+            } catch (error) {
+                console.error('Analytics error:', error);
+                document.getElementById('statsGrid').innerHTML = '<p class="error-state">Failed to load analytics</p>';
+            }
+        }
+
+        function displayBreakdown(stats) {
+            const breakdownCard = document.getElementById('breakdownCard');
+            
+            if (!stats.byType || Object.keys(stats.byType).length === 0) {
+                breakdownCard.innerHTML = '<p class="empty-state">No transaction breakdown available</p>';
+                return;
+            }
+            
+            const typeLabels = {
+                'ADD_MONEY': 'Add Money', 'SEND': 'Send Money', 'RECEIVE': 'Receive Money',
+                'BILL_PAYMENT': 'Bill Payments', 'QR_PAYMENT': 'QR Payments', 'WITHDRAW': 'Withdrawals',
+                'CURRENCY_CONVERSION': 'Currency Conversion'
+            };
+            
+            let html = '<div style="display: grid; gap: var(--spacing-md);">';
+            for (const [type, count] of Object.entries(stats.byType)) {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                        <span style="font-weight: 600;">${typeLabels[type] || type}</span>
+                        <span class="badge badge-info">${count} transaction${count !== 1 ? 's' : ''}</span>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            breakdownCard.innerHTML = html;
+        }
+
+        function createCharts(stats, symbol) {
+            // Destroy existing charts
+            if (trendChart) trendChart.destroy();
+            if (distributionChart) distributionChart.destroy();
+            if (monthlyChart) monthlyChart.destroy();
+
+            const chartColors = {
+                income: '#10b981',
+                expense: '#ef4444',
+                primary: '#3b82f6',
+                accent: '#8b5cf6',
+                warning: '#f59e0b',
+                success: '#10b981',
+                info: '#06b6d4'
+            };
+
+            // Chart defaults for dark theme
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = '#334155';
+
+            // 1. Income vs Expense Trend (Line Chart)
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: generateDateLabels(currentPeriod),
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: generateTrendData(stats.totalIncome || 0, currentPeriod),
+                            borderColor: chartColors.income,
+                            backgroundColor: chartColors.income + '20',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Expense',
+                            data: generateTrendData(stats.totalExpense || 0, currentPeriod),
+                            borderColor: chartColors.expense,
+                            backgroundColor: chartColors.expense + '20',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${symbol}${context.parsed.y.toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => symbol + value.toFixed(0)
+                            },
+                            grid: {
+                                color: '#334155'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#334155'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. Transaction Distribution (Doughnut Chart)
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            const typeData = stats.byType || {};
+            const typeLabels = {
+                'ADD_MONEY': 'Add Money', 'SEND': 'Send', 'RECEIVE': 'Receive',
+                'BILL_PAYMENT': 'Bills', 'QR_PAYMENT': 'QR', 'WITHDRAW': 'Withdraw',
+                'CURRENCY_CONVERSION': 'Convert'
+            };
+            
+            const colors = [
+                chartColors.primary, chartColors.success, chartColors.accent,
+                chartColors.warning, chartColors.info, chartColors.expense,
+                '#ec4899'
+            ];
+
+            distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(typeData).map(type => typeLabels[type] || type),
+                    datasets: [{
+                        data: Object.values(typeData),
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 3. Monthly Comparison (Bar Chart)
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: generateWeeklyData(stats.totalIncome || 0),
+                            backgroundColor: chartColors.income
+                        },
+                        {
+                            label: 'Expense',
+                            data: generateWeeklyData(stats.totalExpense || 0),
+                            backgroundColor: chartColors.expense
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${symbol}${context.parsed.y.toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => symbol + value.toFixed(0)
+                            },
+                            grid: {
+                                color: '#334155'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateDateLabels(period) {
+            if (period === 'week') {
+                return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            } else if (period === 'month') {
+                return ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            } else {
+                return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            }
+        }
+
+        function generateTrendData(total, period) {
+            const points = period === 'week' ? 7 : period === 'month' ? 4 : 12;
+            const avg = total / points;
+            const data = [];
+            
+            for (let i = 0; i < points; i++) {
+                // Add some randomness for realistic trend
+                const variance = (Math.random() - 0.5) * 0.3 * avg;
+                data.push(Math.max(0, avg + variance));
+            }
+            
+            return data;
+        }
+
+        function generateWeeklyData(total) {
+            const avg = total / 4;
+            return Array(4).fill(0).map(() => {
+                const variance = (Math.random() - 0.5) * 0.4 * avg;
+                return Math.max(0, avg + variance);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAnalytics();
+        });
+    </script>
+</body>
+</html>

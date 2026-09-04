@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Money - WalletX</title>
+    <link rel="stylesheet" href="css/walletx-fintech.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+                <a href="wallet.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">Wallet</span></a>
+                <a href="send-money.html" class="nav-item"><span class="nav-icon">📤</span><span class="nav-text">Send Money</span></a>
+                <a href="request-money.html" class="nav-item active"><span class="nav-icon">📥</span><span class="nav-text">Request Money</span></a>
+                <a href="qr-payment.html" class="nav-item"><span class="nav-icon">📱</span><span class="nav-text">QR Payment</span></a>
+                <a href="bills.html" class="nav-item"><span class="nav-icon">🧾</span><span class="nav-text">Bill Payments</span></a>
+                <a href="transactions.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-text">Transactions</span></a>
+                <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">Analytics</span></a>
+                <a href="currency.html" class="nav-item"><span class="nav-icon">💱</span><span class="nav-text">Currency</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-text">Profile</span></a>
+                <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Request Money</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div style="max-width: 600px; margin: 0 auto 2rem;">
+                    <div class="card">
+                        <h2 style="margin-bottom: var(--spacing-xl);">Request Money</h2>
+                        
+                        <form id="requestMoneyForm">
+                            <div class="form-group">
+                                <label>From (Email, Mobile, or Wallet ID)</label>
+                                <input type="text" id="recipient" placeholder="Enter email, mobile, or wallet ID" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="number" id="amount" min="1" step="0.01" placeholder="Enter amount" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select id="currency" required>
+                                    <option value="INR">INR - Indian Rupee</option>
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="AED">AED - UAE Dirham</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Note (Optional)</label>
+                                <textarea id="note" rows="3" placeholder="Add a message"></textarea>
+                            </div>
+
+                            <div id="errorMessage" class="error-message"></div>
+                            <div id="successMessage" class="success-message"></div>
+
+                            <button type="submit" class="btn btn-primary btn-full btn-large">
+                                📥 Send Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 class="section-title">My Money Requests</h3>
+                <div id="requestsList">
+                    <p class="loading">Loading requests...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        function showMessage(elementId, message) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 5000);
+            }
+        }
+
+        document.getElementById('requestMoneyForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const recipient = document.getElementById('recipient').value;
+            const amount = document.getElementById('amount').value;
+            const currency = document.getElementById('currency').value;
+            const note = document.getElementById('note').value;
+
+            try {
+                const response = await api.requestMoney(recipient, amount, currency, note);
+                if (response.success) {
+                    showMessage('successMessage', 'Money request sent successfully!');
+                    e.target.reset();
+                    loadRequests();
+                }
+            } catch (error) {
+                showMessage('errorMessage', error.message || 'Failed to send request');
+            }
+        });
+
+        async function loadRequests() {
+            try {
+                const response = await api.getMoneyRequests();
+                const list = document.getElementById('requestsList');
+                if (response.success && response.data.requests.length > 0) {
+                    list.innerHTML = response.data.requests.map(req => `
+                        <div class="card" style="margin-bottom: var(--spacing-md);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; gap: var(--spacing-md);">
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 0.5rem 0;">${req.type === 'SENT' ? 'To' : 'From'}: ${req.receiverName || req.senderName || 'Unknown'}</h4>
+                                    <p style="color: var(--text-secondary); margin: 0 0 0.5rem 0;">Amount: <strong>${req.currency} ${req.amount}</strong></p>
+                                    <p style="color: var(--text-tertiary); font-size: 0.875rem; margin: 0;">${new Date(req.createdAt).toLocaleDateString()}</p>
+                                </div>
+                                <span class="badge badge-${req.status.toLowerCase()}">${req.status}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<p class="empty-state">No requests found</p>';
+                }
+            } catch (error) {
+                document.getElementById('requestsList').innerHTML = '<p class="error-state">Failed to load requests</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadRequests);
+    </script>
+</body>
+</html>

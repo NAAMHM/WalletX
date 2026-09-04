@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - WalletX</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"><h2>💳 WalletX Admin</h2><button class="sidebar-toggle" onclick="toggleSidebar()">☰</button></div>
+            <nav class="sidebar-nav">
+                <a href="admin.html" class="nav-item active"><span class="nav-icon">👨‍💼</span><span class="nav-text">Admin Dashboard</span></a>
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-text">User Dashboard</span></a>
+                <a href="#" class="nav-item" onclick="logout()"><span class="nav-icon">🚪</span><span class="nav-text">Logout</span></a>
+            </nav>
+            <div class="sidebar-footer"><p class="demo-notice">⚠️ Demo Platform</p></div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+                    <h1 class="page-title">Admin Panel</h1>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <div class="stats-grid" id="adminStats">
+                    <p class="loading">Loading statistics...</p>
+                </div>
+
+                <div class="stats-section" style="margin-top: 2rem;">
+                    <h3 class="section-title">All Users</h3>
+                    <div id="usersList" style="background: white; padding: 1.5rem; border-radius: 8px;">
+                        <p class="loading">Loading users...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar')?.classList.toggle('open');
+        }
+
+        async function loadAdminStats() {
+            try {
+                const response = await api.getAdminStatistics();
+                if (response.success) {
+                    const stats = response.data;
+                    document.getElementById('adminStats').innerHTML = `
+                        <div class="stat-card"><h3>Total Users</h3><p style="font-size:2rem; font-weight:700;">${stats.totalUsers}</p></div>
+                        <div class="stat-card"><h3>Active Users</h3><p style="font-size:2rem; font-weight:700;">${stats.activeUsers}</p></div>
+                        <div class="stat-card"><h3>Total Transactions</h3><p style="font-size:2rem; font-weight:700;">${stats.totalTransactions}</p></div>
+                        <div class="stat-card"><h3>Total Volume</h3><p style="font-size:2rem; font-weight:700;">₹${stats.totalTransactionVolume}</p></div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('adminStats').innerHTML = '<p style="color:#ef4444;">Failed to load stats</p>';
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await api.getAllUsers({ page: 1, limit: 50 });
+                if (response.success) {
+                    const list = document.getElementById('usersList');
+                    list.innerHTML = response.data.users.map(user => `
+                        <div style="padding: 1rem; border-bottom: 1px solid #e2e8f0;">
+                            <p><strong>${user.fullName}</strong> (${user.email})</p>
+                            <p>Role: ${user.role} | Status: <span class="badge ${user.status.toLowerCase()}">${user.status}</span></p>
+                            <p>Joined: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                document.getElementById('usersList').innerHTML = '<p style="color:#ef4444;">Failed to load users</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminStats();
+            loadUsers();
+        });
+    </script>
+</body>
+</html>
