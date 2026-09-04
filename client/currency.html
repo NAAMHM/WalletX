@@ -172,7 +172,7 @@
                 if (currency !== baseCurrency) {
                     html += `
                         <div class="exchange-rate-item">
-                            <span style="font-weight: 600;">1 ${baseCurrency} = ${rate.toFixed(4)} ${currency}</span>
+                            <span style="font-weight: 600;">1 ${baseCurrency} = ${(rate || 0).toFixed(4)} ${currency}</span>
                             <span style="color: var(--text-tertiary); font-size: 0.875rem;">Last updated</span>
                         </div>
                     `;
@@ -199,8 +199,8 @@
             const rate = toRate / fromRate;
             const converted = amount * rate;
 
-            document.getElementById('convertedAmount').value = converted.toFixed(2);
-            document.getElementById('exchangeRateInfo').textContent = `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
+            document.getElementById('convertedAmount').value = (converted || 0).toFixed(2);
+            document.getElementById('exchangeRateInfo').textContent = `1 ${fromCurrency} = ${(rate || 0).toFixed(4)} ${toCurrency}`;
         }
 
         function swapCurrencies() {
@@ -229,11 +229,19 @@
             }
 
             try {
+                // Calculate rate
+                const fromRate = exchangeRates[fromCurrency] || 1;
+                const toRate = exchangeRates[toCurrency] || 1;
+                const rate = toRate / fromRate;
+                
                 const response = await api.convertCurrency(fromCurrency, toCurrency, amount);
                 if (response.success) {
-                    alert(`✓ Successfully converted ${amount} ${fromCurrency} to ${response.data.convertedAmount.toFixed(2)} ${toCurrency}`);
+                    const convertedAmt = response.data?.convertedAmount || response.data?.amount || (amount * rate);
+                    alert(`✓ Successfully converted ${amount} ${fromCurrency} to ${convertedAmt.toFixed(2)} ${toCurrency}`);
                     // Reload wallet
-                    window.location.href = 'wallet.html';
+                    setTimeout(() => {
+                        window.location.href = 'wallet.html';
+                    }, 1000);
                 }
             } catch (error) {
                 alert('Conversion failed: ' + error.message);

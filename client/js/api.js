@@ -3,7 +3,9 @@
  * Centralized API communication
  */
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://your-app-name.vercel.app/api'
+  : 'http://localhost:5000/api';
 
 class API {
     constructor() {

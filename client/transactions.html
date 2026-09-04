@@ -131,7 +131,7 @@
                         <p class="transaction-date">${new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                     <div class="transaction-amount ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? 'positive' : 'negative'}">
-                        ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? '+' : '-'}${currencySymbols[tx.currency] || tx.currency}${tx.amount.toFixed(2)}
+                        ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? '+' : '-'}${currencySymbols[tx.currency] || tx.currency}${(tx.amount || 0).toFixed(2)}
                     </div>
                     <div class="transaction-status ${tx.status.toLowerCase()}">${tx.status}</div>
                 </div>
@@ -158,10 +158,10 @@
                 }
             });
 
-            document.getElementById('totalIncome').textContent = `${symbol}${income.toFixed(2)}`;
-            document.getElementById('totalExpense').textContent = `${symbol}${expense.toFixed(2)}`;
-            document.getElementById('totalSent').textContent = `${symbol}${sent.toFixed(2)}`;
-            document.getElementById('totalReceived').textContent = `${symbol}${received.toFixed(2)}`;
+            document.getElementById('totalIncome').textContent = `${symbol}${(income || 0).toFixed(2)}`;
+            document.getElementById('totalExpense').textContent = `${symbol}${(expense || 0).toFixed(2)}`;
+            document.getElementById('totalSent').textContent = `${symbol}${(sent || 0).toFixed(2)}`;
+            document.getElementById('totalReceived').textContent = `${symbol}${(received || 0).toFixed(2)}`;
         }
 
         function applyFilters() {

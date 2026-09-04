@@ -214,7 +214,7 @@
                     const balance = wallet.balances?.[currency] || 0;
                     
                     document.getElementById('currencySymbol').textContent = currencySymbols[currency] || currency;
-                    document.getElementById('balanceValue').textContent = balance.toFixed(2);
+                    document.getElementById('balanceValue').textContent = (balance || 0).toFixed(2);
                     document.getElementById('walletId').textContent = wallet.walletId || '-';
                     document.getElementById('preferredCurrency').textContent = currency;
                     
@@ -255,7 +255,7 @@
                         <p class="transaction-date">${new Date(tx.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div class="transaction-amount ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? 'positive' : 'negative'}">
-                        ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? '+' : '-'}${currencySymbols[tx.currency] || tx.currency}${tx.amount.toFixed(2)}
+                        ${['ADD_MONEY', 'RECEIVE'].includes(tx.type) ? '+' : '-'}${currencySymbols[tx.currency] || tx.currency}${(tx.amount || 0).toFixed(2)}
                     </div>
                     <div class="transaction-status ${tx.status.toLowerCase()}">${tx.status}</div>
                 </div>

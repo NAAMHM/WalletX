@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Payment - WalletX</title>
     <link rel="stylesheet" href="css/walletx-fintech.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         .qr-container {
             display: grid;
@@ -152,8 +153,18 @@
                 if (response.success) {
                     const qrDisplay = document.getElementById('qrDisplay');
                     const qrImage = document.getElementById('qrImage');
-                    qrImage.src = response.data.qrCode;
-                    qrDisplay.classList.add('active');
+                    
+                    // Use Google Charts API to generate QR code (fallback method)
+                    const qrData = encodeURIComponent(response.data.qrData);
+                    const qrImageUrl = `https://chart.googleapis.com/chart?chs=280x280&cht=qr&chl=${qrData}&choe=UTF-8`;
+                    
+                    qrImage.src = qrImageUrl;
+                    qrImage.onload = () => {
+                        qrDisplay.classList.add('active');
+                    };
+                    qrImage.onerror = () => {
+                        alert('Failed to load QR image. Please check your internet connection.');
+                    };
                 }
             } catch (error) {
                 alert('Failed to generate QR code: ' + error.message);
